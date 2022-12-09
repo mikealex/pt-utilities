@@ -108,7 +108,7 @@ function createContactInfo(contactNumber, happyPath = false, international = fal
     pm.environment.set(`contact:${contactNumber}:dob`, (happyPath || Thor) ? (happyPath ? "1990-01-01" : "1997-10-10") : getRandomDOB());
 
     // var countryCode = Thor ? "CA" : (international ? pm.variables.replaceIn("{{$randomCountryCode}}") : "US");
-    var countryCode = Thor ? "CAN" : (international ? 'CAN' : "US");
+    var countryCode = Thor ? "CA" : (international ? 'CA' : "US");
     pm.environment.set(`contact:${contactNumber}:tax:country`, countryCode);
     pm.environment.set(`contact:${contactNumber}:tax:id-number`, "111" + getRandomInRange(100000, 999999));
 
@@ -125,7 +125,7 @@ function createContactInfo(contactNumber, happyPath = false, international = fal
 
 function createContactPhoneNumberInfo(contactNumber, countryCode = "US") {
     pm.environment.set(`contact:${contactNumber}:phone:country`, countryCode);
-    pm.environment.set(`contact:${contactNumber}:phone:number`, ( countryCode == "US" || countryCode == 'CAN') ? pm.variables.replaceIn("{{$randomPhoneNumber}}"):pm.variables.replaceIn("{{$randomPhoneNumberExt}}"));
+    pm.environment.set(`contact:${contactNumber}:phone:number`, ( countryCode == "US" || countryCode == 'CA') ? pm.variables.replaceIn("{{$randomPhoneNumber}}"):pm.variables.replaceIn("{{$randomPhoneNumberExt}}"));
 }
 
 function createContactAddressInfo(contactNumber, countryCode = "US", Thor = false) {
