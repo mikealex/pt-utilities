@@ -86,11 +86,21 @@ function createHappyPathDomesticContactInfo(contactNumber) { createContactInfo(c
 function createIntlContactInfo(contactNumber) { createContactInfo(contactNumber,false,true);}
 function createHappyPathIntlContactInfo(contactNumber) { createContactInfo(contactNumber,true,true);}
 function createThorContactInfo(contactNumber) { createContactInfo(contactNumber,false,true,true,true,true);}
+function createStearneContactInfo(contactNumber) { createContactInfo(contactNumber,false,true,true,true,false,true);}
 
-function createContactInfo(contactNumber, happyPath = false, international = false, updateAddress = true, updatePhoneNumber = true, Thor = false) {
-    var firstName = (happyPath || Thor) ? (happyPath ? 'John' : 'Thor') : pm.variables.replaceIn("{{$randomFirstName}}");
-    var middleName = (happyPath || Thor) ? (happyPath ? '' : 'Hammer' ) : (Math.random() < 0.25) ? pm.variables.replaceIn("{{$randomFirstName}}") : "";
-    var lastName = (happyPath || Thor) ? (happyPath ? 'Jones' : 'Odinson') : pm.variables.replaceIn("{{$randomLastName}}");
+function createContactInfo(contactNumber, happyPath = false, international = false, updateAddress = true, updatePhoneNumber = true, Thor = false, Stearne = false) {
+    var firstName = happyPath ? 'John' :
+                    Thor      ? 'Thor' :
+                    Stearne   ? 'John':
+                                pm.variables.replaceIn("{{$randomFirstName}}");
+    var middleName = happyPath ? '' :
+                     Thor      ? 'Hammer' :
+                     Stearne   ? '' :
+                                 (Math.random() < 0.25) ? pm.variables.replaceIn("{{$randomFirstName}}") : "";
+    var lastName = happyPath ? 'Jones' :
+                   Thor      ? 'Odinson' :
+                   Stearne   ? 'Stearne' :
+                               pm.variables.replaceIn("{{$randomLastName}}");
 
     var fullName = `${firstName}`;
     if (middleName != "") {
@@ -98,24 +108,28 @@ function createContactInfo(contactNumber, happyPath = false, international = fal
     }
     fullName += ` ${lastName}`;
 
-    var email = (happyPath || Thor) ? (happyPath ? 'John@example.com':'Thor@example.com'):fullName.replace(/\s|,|\'|\./g, "") + "@mailinator.com";
+    var email = happyPath ? 'John@example.com':fullName.replace(/\s|,|\'|\./g, "") + "@mailinator.com";
 
     pm.environment.set(`contact:${contactNumber}:name`, fullName);
     pm.environment.set(`contact:${contactNumber}:firstname`, firstName);
     pm.environment.set(`contact:${contactNumber}:middlename`, middleName);
     pm.environment.set(`contact:${contactNumber}:lastname`, lastName);
     pm.environment.set(`contact:${contactNumber}:email`, email);
-    pm.environment.set(`contact:${contactNumber}:dob`, (happyPath || Thor) ? (happyPath ? "1990-01-01" : "1997-10-10") : getRandomDOB());
+    pm.environment.set(`contact:${contactNumber}:dob`,
+        happyPath ? "1990-01-01" :
+        Thor      ? "1997-10-10" :
+        Stearne   ? "1958-07-02" :
+                    getRandomDOB());
 
     // var countryCode = Thor ? "CA" : (international ? pm.variables.replaceIn("{{$randomCountryCode}}") : "US");
-    var countryCode = Thor ? "CA" : (international ? 'CA' : "US");
+    var countryCode = (Thor || Stearne ) ? "CA" : (international ? 'CA' : "US");
     pm.environment.set(`contact:${contactNumber}:tax:country`, countryCode);
     pm.environment.set(`contact:${contactNumber}:tax:id-number`, "111" + getRandomInRange(100000, 999999));
 
     pm.environment.set(`contact:${contactNumber}:ipaddress`, pm.variables.replaceIn("{{$randomIP}}"));
 
     if (updateAddress) {
-        createContactAddressInfo(contactNumber, countryCode, Thor);
+        createContactAddressInfo(contactNumber, countryCode, Thor, Stearne);
     }
 
     if (updatePhoneNumber) {
@@ -128,17 +142,20 @@ function createContactPhoneNumberInfo(contactNumber, countryCode = "US") {
     pm.environment.set(`contact:${contactNumber}:phone:number`, ( countryCode == "US" || countryCode == 'CA') ? pm.variables.replaceIn("{{$randomPhoneNumber}}"):pm.variables.replaceIn("{{$randomPhoneNumberExt}}"));
 }
 
-function createContactAddressInfo(contactNumber, countryCode = "US", Thor = false) {
-    pm.environment.set(`contact:${contactNumber}:address:street-1`, Thor ? '69 Big Hammer Lane' : pm.variables.replaceIn("{{$randomStreetAddress}}"));
+function createContactAddressInfo(contactNumber, countryCode = "US", Thor = false, Stearne = false) {
+    pm.environment.set(`contact:${contactNumber}:address:street-1`, ( Thor || Stearne ) ? '69 Big Hammer Lane' : pm.variables.replaceIn("{{$randomStreetAddress}}"));
     pm.environment.set(`contact:${contactNumber}:address:street-2`, '');
     pm.environment.set(`contact:${contactNumber}:address:postal-code`, ( countryCode != 'US' || Thor ) ? 'K1R 7Y5' : getRandomInRange(10001, 99999));
-    pm.environment.set(`contact:${contactNumber}:address:city`, Thor ? 'Ottawa' : pm.variables.replaceIn("{{$randomCity}}"));
-    pm.environment.set(`contact:${contactNumber}:address:region`, Thor ? 'ON': (countryCode == "US" ? states[getRandomInRange(0, states.length - 1)]:""));
+    pm.environment.set(`contact:${contactNumber}:address:city`, ( Thor || Stearne ) ? 'Ottawa' : pm.variables.replaceIn("{{$randomCity}}"));
+    pm.environment.set(`contact:${contactNumber}:address:region`, ( Thor || Stearne ) ? 'ON': (countryCode == "US" ? states[getRandomInRange(0, states.length - 1)]:""));
     pm.environment.set(`contact:${contactNumber}:address:country`, countryCode);
 }
 
-function createSocureInfo(contactNumber, Thor = false) {
-    pm.environment.set(`contact:${contactNumber}:socure:document-id`, Thor ? 'f8a0f9d6-474b-4d70-9666-f14dea8f32a0' : pm.variables.replaceIn('{{$guid}}'));
+function createSocureInfo(contactNumber, Thor = false, Stearne = false) {
+    pm.environment.set(`contact:${contactNumber}:socure:document-id`,
+        Thor    ? 'f8a0f9d6-474b-4d70-9666-f14dea8f32a0' :
+        Stearne ? '7d4e9775-abe0-4fdd-8a69-203867e580ed' :
+                  pm.variables.replaceIn('{{$guid}}'));
     pm.environment.set(`contact:${contactNumber}:socure:device-id`, pm.variables.replaceIn('{{$guid}}'));
 }
 
